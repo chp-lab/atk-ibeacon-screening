@@ -1,0 +1,591 @@
+[
+    {
+        "id": "28f1728f.02c5de",
+        "type": "http in",
+        "z": "bd29eaa8.240968",
+        "name": "webhook",
+        "url": "/api/v1/atk/hooking",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 80,
+        "y": 220,
+        "wires": [
+            [
+                "f0a7ec6c.0fb2f",
+                "30faa379.3cb08c",
+                "7ad70247.2e2b6c"
+            ]
+        ]
+    },
+    {
+        "id": "f0a7ec6c.0fb2f",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 100,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "30faa379.3cb08c",
+        "type": "http response",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 180,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "70a45f60.eb09e",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 460,
+        "y": 160,
+        "wires": [
+            [
+                "a5665a5d.ae5908"
+            ]
+        ]
+    },
+    {
+        "id": "64308bf3.420724",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "isUserExist",
+        "func": "let one_id = msg[\"onechat\"][\"source\"][\"one_id\"];\nlet q_cmd = `SELECT users.one_email\nFROM users\nWHERE users.one_id='${one_id}'`;\nmsg.topic = q_cmd;\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 340,
+        "y": 100,
+        "wires": [
+            [
+                "70a45f60.eb09e"
+            ]
+        ]
+    },
+    {
+        "id": "7ad70247.2e2b6c",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "source",
+                "vt": "str"
+            },
+            {
+                "t": "hask",
+                "v": "event_stage",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 240,
+        "y": 220,
+        "wires": [
+            [
+                "5f9d7f56.6e917"
+            ],
+            [
+                "f9d8452c.fb0ea8",
+                "8c3c1b12.e03a58"
+            ]
+        ]
+    },
+    {
+        "id": "5f9d7f56.6e917",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "one_obj",
+        "func": "msg.onechat = msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 270,
+        "y": 160,
+        "wires": [
+            [
+                "64308bf3.420724"
+            ]
+        ]
+    },
+    {
+        "id": "10fec010.0a16b",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "addNewUser",
+        "func": "let one_id = msg[\"onechat\"][\"source\"][\"one_id\"];\nlet one_email = msg[\"onechat\"][\"source\"][\"email\"];\nlet name = msg[\"onechat\"][\"source\"][\"display_name\"];\n\nlet q_cmd = `INSERT INTO users (one_email, one_id, name, profile_pic, role, token, company_id, created_at) \nVALUES ('${one_email}', '${one_id}', '${name}', NULL, NULL, '', 0, CURRENT_TIMESTAMP)`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 750,
+        "y": 100,
+        "wires": [
+            [
+                "48899a00.76b608"
+            ]
+        ]
+    },
+    {
+        "id": "a5665a5d.ae5908",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "found_user",
+        "func": "let num_user = msg.payload.length;\nmsg.payload = num_user;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 550,
+        "y": 120,
+        "wires": [
+            [
+                "99a3f672.23f188"
+            ]
+        ]
+    },
+    {
+        "id": "99a3f672.23f188",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 650,
+        "y": 160,
+        "wires": [
+            [
+                "10fec010.0a16b"
+            ],
+            [
+                "27257c97.6629c4"
+            ]
+        ]
+    },
+    {
+        "id": "48899a00.76b608",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "insertData",
+        "x": 850,
+        "y": 160,
+        "wires": [
+            [
+                "11fd6242.451f4e"
+            ]
+        ]
+    },
+    {
+        "id": "11fd6242.451f4e",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 950,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "b27538d7.24eed8",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "smsg",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://chat-api.one.th/message/api/v1/push_message",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "bearer",
+        "x": 870,
+        "y": 220,
+        "wires": [
+            [
+                "26f0f7d0.5f9db8"
+            ]
+        ]
+    },
+    {
+        "id": "27257c97.6629c4",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "hello",
+        "func": "let device_list = msg.payload;\nlet oneid = msg['onechat']['source']['one_id'];\nlet bot_id = msg['onechat']['bot_id'];\nlet list_msg = \"hello\";\nlet req_body = {\n\t\"to\": oneid,\n\t\"bot_id\": \"Bae6208e0e88a54899030be3b4a903eea\",\n\t\"type\": \"text\",\n\t\"message\": list_msg,\n\t\"custom_notification\": \"เปิดอ่านข้อความใหม่จากทางเรา\"\n}\n\nmsg.payload = req_body;\nmsg.topic = \"covid_status\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 710,
+        "y": 200,
+        "wires": [
+            [
+                "b27538d7.24eed8"
+            ]
+        ]
+    },
+    {
+        "id": "26f0f7d0.5f9db8",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "ffae6c7f.10de5",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "event_stage",
+        "property": "ibcon.event_stage",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "enter",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "proximity_change",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "leave",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 510,
+        "y": 280,
+        "wires": [
+            [
+                "4ae03151.69a98"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "f9d8452c.fb0ea8",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "ibcon_obj",
+        "func": "msg.ibcon = msg.payload;\nlet ib_datetime_str = msg['ibcon']['timestamp'];\nlet unixTs = Date.parse(ib_datetime_str);\n// msg.payload = msg.ibcon['event_stage'];\nlet ib_datetime = new Date(unixTs);\nlet _year = ib_datetime.getFullYear();\nlet _month = ib_datetime.getMonth() + 1;\nlet _date = ib_datetime.getDate();\nlet _hour = ib_datetime.getHours();\nlet _minute = ib_datetime.getMinutes();\n\nfunction toDTF(dtf)\n{\n    if(Number(dtf) < 10)\n    {\n        return `0${dtf}`;\n    }\n    else\n    {\n        return `${dtf}`;\n    }\n}\n\n_month = toDTF(_month);\n_date = toDTF(_date);\n\n_hour = toDTF(_hour);\n_minute = toDTF(_minute);\n\nlet date_str = `${_year}-${_month}-${_date}`;\nlet time_str = `${_hour}:${_minute}`;\n\nlet date_format_str = ib_datetime.toLocaleDateString();\nlet time_format_str = ib_datetime.toLocaleTimeString();\n\n\nmsg['ibcon']['date_str'] = date_str;\nmsg['ibcon']['time_str'] = time_str;\nmsg['ibcon']['date_format_str'] = date_str;\nmsg['ibcon']['time_format_str'] = time_format_str;\n\n// let jakarta_dt = unixTs.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });\nmsg.payload = msg.ibcon;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 340,
+        "y": 280,
+        "wires": [
+            [
+                "ffae6c7f.10de5",
+                "57fce251.b75ebc",
+                "c12faee4.94a27"
+            ]
+        ]
+    },
+    {
+        "id": "8c3c1b12.e03a58",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "57fce251.b75ebc",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "func": "let device_list = msg.payload;\nlet oneid = msg['ibcon']['oneid'];\nlet event_stage = msg['ibcon']['event_stage'];\nlet proximity = msg['ibcon']['proximity'];\n\nlet res_msg = `event_stage:${event_stage}\\r\\nproximity:${proximity}`;\n\nlet req_body = {\n\t\"to\": oneid,\n\t\"bot_id\": \"Bae6208e0e88a54899030be3b4a903eea\",\n\t\"type\": \"text\",\n\t\"message\": res_msg,\n\t\"custom_notification\": \"เปิดอ่านข้อความใหม่จากทางเรา\"\n}\n\nmsg.payload = req_body;\nmsg.topic = \"atk_debuging\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 340,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b5174c44.6cad5",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "smsg",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://chat-api.one.th/message/api/v1/push_message",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "bearer",
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "31a98316.e7d83c"
+            ]
+        ]
+    },
+    {
+        "id": "31a98316.e7d83c",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "4ae03151.69a98",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "shop_info",
+        "func": "let major = msg['ibcon']['major'];\nlet minor = msg['ibcon']['minor'];\n\nlet q_cmd =`SELECT shops.minor, shops.major, shops.shop_id\nFROM shops\nWHERE shops.major=${major} AND shops.minor=${minor}`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 680,
+        "y": 280,
+        "wires": [
+            [
+                "efd7815.4b3b58"
+            ]
+        ]
+    },
+    {
+        "id": "efd7815.4b3b58",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 780,
+        "y": 340,
+        "wires": [
+            [
+                "7b08e88.541b018"
+            ]
+        ]
+    },
+    {
+        "id": "7b08e88.541b018",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "num_shop",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 870,
+        "y": 280,
+        "wires": [
+            [],
+            [
+                "bd4a5a28.115ed8"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "a91dd740.f72d08",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "enter",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1070,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "bd4a5a28.115ed8",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "atk_verify",
+        "func": "let merchant_id = msg.payload[0]['shop_id'];\nlet customer_id = msg['ibcon']['oneid'];\nlet date_str = msg['ibcon']['date_str'];\nlet time_str = msg['ibcon']['time_str'];\nlet event_state = msg['ibcon']['event_stage'];\nlet proximity = msg['ibcon']['proximity'];\n\nlet req_body = {\n    \"customer_id\":customer_id,\n    \"merchant_id\":merchant_id,\n    \"date\":date_str,\n    \"time\":time_str,\n    // \"event_stage\":event_state,\n    // \"proximity\":proximity\n}\n\nmsg.headers = {};\nmsg.headers[\"content-type\"] ='application/json';\nmsg.payload = req_body;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1060,
+        "y": 260,
+        "wires": [
+            [
+                "a938b68c.bf5aa8",
+                "268acca.9f92234"
+            ]
+        ]
+    },
+    {
+        "id": "a938b68c.bf5aa8",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "atk_screening",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://uat-atkscreening.one.th/management/api/v1/status/verify",
+        "tls": "dcfab808.896d58",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 1080,
+        "y": 300,
+        "wires": [
+            [
+                "a91dd740.f72d08"
+            ]
+        ]
+    },
+    {
+        "id": "c12faee4.94a27",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 490,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "268acca.9f92234",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1200,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "97e0808.147cb8",
+        "type": "MySQLdatabase",
+        "name": "atk-ibc",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "atk-ibcon",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "dcfab808.896d58",
+        "type": "tls-config",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": false
+    }
+]
