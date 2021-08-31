@@ -1,0 +1,2402 @@
+[
+    {
+        "id": "bd29eaa8.240968",
+        "type": "tab",
+        "label": "atk",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "8c5ae4a5.2f7c48",
+        "type": "tab",
+        "label": "devices",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "6edcc1be.603c4",
+        "type": "tab",
+        "label": "atk-old",
+        "disabled": true,
+        "info": ""
+    },
+    {
+        "id": "97e0808.147cb8",
+        "type": "MySQLdatabase",
+        "name": "atk-ibc",
+        "host": "127.0.0.1",
+        "port": "3306",
+        "db": "atk-ibcon",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "dcfab808.896d58",
+        "type": "tls-config",
+        "name": "",
+        "cert": "",
+        "key": "",
+        "ca": "",
+        "certname": "",
+        "keyname": "",
+        "caname": "",
+        "servername": "",
+        "verifyservercert": false
+    },
+    {
+        "id": "28f1728f.02c5de",
+        "type": "http in",
+        "z": "bd29eaa8.240968",
+        "name": "webhook",
+        "url": "/api/v1/atk/hooking",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 80,
+        "y": 220,
+        "wires": [
+            [
+                "f0a7ec6c.0fb2f",
+                "30faa379.3cb08c",
+                "7ad70247.2e2b6c"
+            ]
+        ]
+    },
+    {
+        "id": "f0a7ec6c.0fb2f",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 130,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "30faa379.3cb08c",
+        "type": "http response",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 180,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "7ad70247.2e2b6c",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "hask",
+                "v": "source",
+                "vt": "str"
+            },
+            {
+                "t": "hask",
+                "v": "event_stage",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 240,
+        "y": 220,
+        "wires": [
+            [],
+            [
+                "f9d8452c.fb0ea8"
+            ]
+        ]
+    },
+    {
+        "id": "ffae6c7f.10de5",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "event_stage",
+        "property": "ibcon.event_stage",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "enter",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "proximity_change",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "leave",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 4,
+        "x": 550,
+        "y": 320,
+        "wires": [
+            [
+                "b4865c60.5e70c"
+            ],
+            [
+                "b4865c60.5e70c"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "f9d8452c.fb0ea8",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "ibcon_obj",
+        "func": "msg.ibcon = msg.payload;\nlet ib_datetime_str = msg['ibcon']['timestamp'];\nlet unixTs = Date.parse(ib_datetime_str);\n// msg.payload = msg.ibcon['event_stage'];\nlet ib_datetime = new Date(unixTs);\nlet _year = ib_datetime.getFullYear();\nlet _month = ib_datetime.getMonth() + 1;\nlet _date = ib_datetime.getDate();\nlet _hour = ib_datetime.getHours();\nlet _minute = ib_datetime.getMinutes();\n\nfunction toDTF(dtf)\n{\n    if(Number(dtf) < 10)\n    {\n        return `0${dtf}`;\n    }\n    else\n    {\n        return `${dtf}`;\n    }\n}\n\n_month = toDTF(_month);\n_date = toDTF(_date);\n\n_hour = toDTF(_hour);\n_minute = toDTF(_minute);\n\nlet date_str = `${_year}-${_month}-${_date}`;\nlet time_str = `${_hour}:${_minute}`;\n\nlet date_format_str = ib_datetime.toLocaleDateString();\nlet time_format_str = ib_datetime.toLocaleTimeString();\n\n\nmsg['ibcon']['date_str'] = date_str;\nmsg['ibcon']['time_str'] = time_str;\nmsg['ibcon']['date_format_str'] = date_str;\nmsg['ibcon']['time_format_str'] = time_format_str;\n\n// let jakarta_dt = unixTs.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });\nmsg.payload = msg.ibcon;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 340,
+        "y": 280,
+        "wires": [
+            [
+                "ffae6c7f.10de5",
+                "57fce251.b75ebc",
+                "c12faee4.94a27"
+            ]
+        ]
+    },
+    {
+        "id": "57fce251.b75ebc",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "debug",
+        "func": "let oneid = msg['ibcon']['oneid'];\nlet event_stage = msg['ibcon']['event_stage'];\nlet proximity = msg['ibcon']['proximity'];\nlet major = msg['ibcon']['major'];\nlet minor = msg['ibcon']['minor'];\n\nlet res_msg = `major:${major}\\r\\nminor:${minor}\\r\nminorevent_stage:${event_stage}\\r\\nproximity:${proximity}`;\n\nlet req_body = {\n\t\"to\": oneid,\n\t\"bot_id\": \"Bae6208e0e88a54899030be3b4a903eea\",\n\t\"type\": \"text\",\n\t\"message\": res_msg,\n\t\"custom_notification\": \"เปิดอ่านข้อความใหม่จากทางเรา\"\n}\n\nmsg.payload = req_body;\nmsg.topic = \"atk_debuging\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 330,
+        "y": 340,
+        "wires": [
+            [
+                "b5174c44.6cad5"
+            ]
+        ]
+    },
+    {
+        "id": "b5174c44.6cad5",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "smsg",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://chat-api.one.th/message/api/v1/push_message",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "bearer",
+        "x": 330,
+        "y": 380,
+        "wires": [
+            [
+                "31a98316.e7d83c"
+            ]
+        ]
+    },
+    {
+        "id": "31a98316.e7d83c",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 350,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "4ae03151.69a98",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "shop_info",
+        "func": "let major = msg['ibcon']['major'];\nlet minor = msg['ibcon']['minor'];\n\nlet q_cmd =`SELECT shops.minor, shops.major, shops.shop_id, shops.sn\nFROM shops\nWHERE shops.major=${major} AND shops.minor=${minor}`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 860,
+        "y": 140,
+        "wires": [
+            [
+                "efd7815.4b3b58"
+            ]
+        ]
+    },
+    {
+        "id": "efd7815.4b3b58",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 880,
+        "y": 180,
+        "wires": [
+            [
+                "7b08e88.541b018"
+            ]
+        ]
+    },
+    {
+        "id": "7b08e88.541b018",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "num_shop",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 970,
+        "y": 240,
+        "wires": [
+            [
+                "fdb0dd2d.0dd"
+            ],
+            [
+                "bd4a5a28.115ed8"
+            ],
+            [
+                "fdb0dd2d.0dd"
+            ]
+        ]
+    },
+    {
+        "id": "bd4a5a28.115ed8",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "atk_verify",
+        "func": "let merchant_id = msg.payload[0]['shop_id'];\nlet sn = msg.payload[0]['sn'];\nlet customer_id = msg['ibcon']['oneid'];\nlet date_str = msg['ibcon']['date_str'];\nlet time_str = msg['ibcon']['time_str'];\nlet event_stage = msg['ibcon']['event_stage'];\nlet proximity = msg['ibcon']['proximity'];\n\nif(event_stage == \"proximity_change\")\n{\n    event_stage = \"enter\";\n}\nelse if(\"leave\")\n{\n    event_stage = \"leave\";\n}\n\nlet req_body = {\n    \"customer_id\":customer_id,\n    \"merchant_id\":\"\",\n    \"serial_number\":sn,\n    \"date\":date_str,\n    \"time\":time_str,\n    \"event_stage\":event_stage,\n    \"proximity\":proximity\n}\n\nmsg.headers = {};\nmsg.headers[\"content-type\"] ='application/json';\nmsg.payload = req_body;\n// if(customer_id == \"6271993808\")\n// {\n//     msg.payload[\"mode\"] = \"dev\";\n// }\n\n// msg.payload[\"mode\"] = \"dev\";\nmsg.topic = \"atk_verify\";\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1080,
+        "y": 160,
+        "wires": [
+            [
+                "268acca.9f92234",
+                "1869d80c.d01e18"
+            ]
+        ]
+    },
+    {
+        "id": "a938b68c.bf5aa8",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "atk_screening",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://atkscreening.one.th/management/api/v2/status/verify",
+        "tls": "dcfab808.896d58",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 1200,
+        "y": 240,
+        "wires": [
+            [
+                "31993c08.cb7ea4",
+                "ed8c3552.47aad8"
+            ]
+        ]
+    },
+    {
+        "id": "c12faee4.94a27",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 150,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "268acca.9f92234",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "df15e1fe.2eb2",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "vaccinations",
+        "func": "let one_id = msg['ibcon']['oneid'];\n\nlet q_cmd = `SELECT vaccinations.vaccination_id, vaccinations.one_id, vaccinations.shot, vaccinations.created_by, vaccinations.created_at, \nvaccinations.updated_at, DATEDIFF(CURRENT_DATE, vaccinations.updated_at) AS days_from_last_shot, users.name AS username\nFROM vaccinations\nLEFT JOIN users ON vaccinations.one_id=users.one_id\nWHERE vaccinations.one_id='${one_id}'\nORDER BY vaccinations.created_at DESC\nLIMIT 1`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 290,
+        "y": 220,
+        "wires": [
+            [
+                "85a23022.3006d"
+            ]
+        ]
+    },
+    {
+        "id": "4a6d4ff7.fe017",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 770,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "85a23022.3006d",
+        "type": "mysql",
+        "z": "6edcc1be.603c4",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 360,
+        "y": 280,
+        "wires": [
+            [
+                "3605f9f4.5fbdc6",
+                "c582448e.6bfb28"
+            ]
+        ]
+    },
+    {
+        "id": "3605f9f4.5fbdc6",
+        "type": "switch",
+        "z": "6edcc1be.603c4",
+        "name": "immunity",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 430,
+        "y": 360,
+        "wires": [
+            [],
+            [
+                "d8b91b6b.c9a758",
+                "30c9a452.55630c"
+            ]
+        ]
+    },
+    {
+        "id": "1542d94e.b54fa7",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "782ac4b7.63c08c",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "atk_invalid",
+        "func": "let device_list = msg.payload;\nlet oneid = msg['ibcon']['oneid'];\nlet list_msg = \"ATK Invalid\";\nlet req_body = {\n\t\"to\": oneid,\n\t\"bot_id\": \"Bae6208e0e88a54899030be3b4a903eea\",\n\t\"type\": \"text\",\n\t\"message\": list_msg,\n\t\"custom_notification\": \"เปิดอ่านข้อความใหม่จากทางเรา\"\n}\n\nmsg.payload = req_body;\nmsg.topic = \"covid_status\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 540,
+        "y": 300,
+        "wires": [
+            [
+                "5f1241ff.a48a7"
+            ]
+        ]
+    },
+    {
+        "id": "d8b91b6b.c9a758",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "res_msg",
+        "func": "let immu = msg.payload[0];\nlet shop_info = msg[\"shop_obj\"];\n\nlet one_id = msg['ibcon']['oneid'];\nlet event_stage = msg['ibcon'][\"event_stage\"];\nlet proximity = msg['ibcon']['proximity'];\nlet major = msg['ibcon']['major'];\nlet minor = msg['ibcon']['minor'];\nlet user_latitude = msg['ibcon']['user_latitude'];\nlet user_longitude = msg['ibcon']['user_longitude'];\n\nlet shot = immu['shot'];\nlet days_from_last_shot = immu['days_from_last_shot'];\nlet created_at = immu['created_at'];\nlet updated_at = immu['updated_at'];\nlet username = immu['username'];\n\nlet shop_id = shop_info['shop_id'];\nlet shop_name = shop_info['shop_name'];\n\nlet res_msg = `## user_info ##\\r\\nusername: ${username}\\r\\none_id: ${one_id}\\r\nuser_latitude: ${user_latitude}\\r\\nuser_longitude: ${user_longitude}\\r\n\n## vaccinations_info ##\\r\\nnum_shot: ${shot}\\r\\ncreated_at: ${created_at}\\r\nupdated_at: ${updated_at}\\r\\ndays_from_last_shot: ${days_from_last_shot}\\r\nmajor: ${major}\\r\\nminor:${minor}\\r\nevent_stage: ${event_stage}\\r\\nproximity: ${proximity}\\r\n\n## shop info ##\\r\nshop_id: ${shop_id}\\r\\nshop_name: ${shop_name}`\n\nlet req_body = {\n\t\"to\": one_id,\n\t\"bot_id\": \"Bae6208e0e88a54899030be3b4a903eea\",\n\t\"type\": \"text\",\n\t\"message\": res_msg,\n\t\"custom_notification\": \"เปิดอ่านข้อความใหม่จากทางเรา\"\n}\n\nmsg.payload = req_body;\nmsg.topic = \"covid_status\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 490,
+        "y": 420,
+        "wires": [
+            [
+                "dd88fab4.6a3ec8"
+            ]
+        ]
+    },
+    {
+        "id": "5f1241ff.a48a7",
+        "type": "http request",
+        "z": "6edcc1be.603c4",
+        "name": "smsg",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://chat-api.one.th/message/api/v1/push_message",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "bearer",
+        "x": 580,
+        "y": 260,
+        "wires": [
+            [
+                "4a6d4ff7.fe017"
+            ]
+        ]
+    },
+    {
+        "id": "dd88fab4.6a3ec8",
+        "type": "http request",
+        "z": "6edcc1be.603c4",
+        "name": "smsg",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://chat-api.one.th/message/api/v1/push_message",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "bearer",
+        "x": 630,
+        "y": 360,
+        "wires": [
+            [
+                "1542d94e.b54fa7"
+            ]
+        ]
+    },
+    {
+        "id": "c582448e.6bfb28",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 490,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "30c9a452.55630c",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 270,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "32261b8f.a8ddd4",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "shop_info",
+        "func": "let major = msg['ibcon']['major'];\nlet minor = msg['ibcon']['minor'];\n\nlet q_cmd =`SELECT shops.minor, shops.shop_id, shops.shop_name\nFROM shops\nWHERE shops.major=${major} AND shops.minor=${minor}`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 340,
+        "y": 120,
+        "wires": [
+            [
+                "bad58370.b9a62"
+            ]
+        ]
+    },
+    {
+        "id": "bad58370.b9a62",
+        "type": "mysql",
+        "z": "6edcc1be.603c4",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 460,
+        "y": 80,
+        "wires": [
+            [
+                "1a0d60c7.393d9f"
+            ]
+        ]
+    },
+    {
+        "id": "c3f17a96.415af8",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "shop_obj",
+        "func": "msg['shop_obj'] = msg.payload[0];\nmsg.payload = null;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 480,
+        "y": 180,
+        "wires": [
+            [
+                "df15e1fe.2eb2"
+            ]
+        ]
+    },
+    {
+        "id": "1a0d60c7.393d9f",
+        "type": "switch",
+        "z": "6edcc1be.603c4",
+        "name": "num_shop",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 570,
+        "y": 120,
+        "wires": [
+            [
+                "4289f337.a8813c"
+            ],
+            [
+                "c3f17a96.415af8",
+                "fc298949.5e4448"
+            ],
+            [
+                "4289f337.a8813c"
+            ]
+        ]
+    },
+    {
+        "id": "4289f337.a8813c",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 800,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "fc298949.5e4448",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 730,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "3bc0457.051473a",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "proximity",
+        "property": "ibcon.proximity",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "immediate",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "near",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "far",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 660,
+        "y": 40,
+        "wires": [
+            [
+                "4ae03151.69a98"
+            ],
+            [
+                "4ae03151.69a98"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "ed8c3552.47aad8",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "checkVerifyStatus",
+        "property": "payload.status",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "success",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1190,
+        "y": 340,
+        "wires": [
+            [
+                "e21a6263.61e76"
+            ],
+            [
+                "33c7906a.572fd"
+            ]
+        ]
+    },
+    {
+        "id": "33c7906a.572fd",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "verify_failed",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1210,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "e21a6263.61e76",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "accessLog",
+        "func": "let one_id = msg['ibcon']['oneid'];\nlet minor = msg['ibcon']['minor'];\nlet major = msg['ibcon']['major'];\nlet event_stage = msg['ibcon']['event_stage'];\nlet q_cmd = \"\";\n\nif(event_stage == \"leave\")\n{\n    q_cmd = `UPDATE access_logs SET leave_at = CURRENT_TIMESTAMP \n    WHERE access_logs.one_id='${one_id}' AND access_logs.minor='${minor}'AND access_logs.major='${major}' \n    AND DATE(access_logs.created_at)=CURRENT_DATE AND access_logs.leave_at IS NULL`;\n}\nelse\n{\n    q_cmd = `INSERT INTO access_logs (access_id, one_id, minor, major, created_at, updated_at, leave_at)\n    VALUES (NULL, '${one_id}', '${minor}', '${major}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)`;\n}\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1350,
+        "y": 280,
+        "wires": [
+            [
+                "b04e2ff5.154e6"
+            ]
+        ]
+    },
+    {
+        "id": "b04e2ff5.154e6",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "addLog",
+        "x": 1440,
+        "y": 220,
+        "wires": [
+            [
+                "2722721a.f59016",
+                "717f532e.5eea5c"
+            ]
+        ]
+    },
+    {
+        "id": "26dca5e3.38201a",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1570,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "b4865c60.5e70c",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "isExist",
+        "func": "let one_id = msg['ibcon']['oneid'];\nlet minor = msg['ibcon']['minor'];\nlet major = msg['ibcon']['major'];\n\nlet q_cmd = `SELECT access_logs.access_id, access_logs.one_id, access_logs.minor, access_logs.major, access_logs.updated_at, access_logs.leave_at\nFROM access_logs\nWHERE access_logs.one_id='${one_id}' AND access_logs.minor=${minor} AND access_logs.major=${major} AND DATE(access_logs.created_at)=CURRENT_DATE AND access_logs.leave_at IS NULL`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 250,
+        "y": 160,
+        "wires": [
+            [
+                "fa570ba8.bd6ac8"
+            ]
+        ]
+    },
+    {
+        "id": "fa570ba8.bd6ac8",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 200,
+        "y": 60,
+        "wires": [
+            [
+                "772f0df2.081e14",
+                "47133d19.7f5204"
+            ]
+        ]
+    },
+    {
+        "id": "d79069ce.36a238",
+        "type": "mysql",
+        "z": "6edcc1be.603c4",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 360,
+        "y": 700,
+        "wires": [
+            [
+                "7d0ae80a.91af08"
+            ]
+        ]
+    },
+    {
+        "id": "287f91cb.ec4e1e",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "isUserExist",
+        "func": "let one_id = msg[\"onechat\"][\"source\"][\"one_id\"];\nlet q_cmd = `SELECT users.one_email\nFROM users\nWHERE users.one_id='${one_id}'`;\nmsg.topic = q_cmd;\nreturn msg",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 240,
+        "y": 640,
+        "wires": [
+            [
+                "d79069ce.36a238"
+            ]
+        ]
+    },
+    {
+        "id": "c0c0747e.9f2688",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "one_obj",
+        "func": "msg.onechat = msg.payload;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 170,
+        "y": 700,
+        "wires": [
+            [
+                "287f91cb.ec4e1e"
+            ]
+        ]
+    },
+    {
+        "id": "b8cdfca1.2c0cf",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "addNewUser",
+        "func": "let one_id = msg[\"onechat\"][\"source\"][\"one_id\"];\nlet one_email = msg[\"onechat\"][\"source\"][\"email\"];\nlet name = msg[\"onechat\"][\"source\"][\"display_name\"];\n\nlet q_cmd = `INSERT INTO users (one_email, one_id, name, profile_pic, role, token, company_id, created_at) \nVALUES ('${one_email}', '${one_id}', '${name}', NULL, NULL, '', 0, CURRENT_TIMESTAMP)`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 650,
+        "y": 640,
+        "wires": [
+            [
+                "427f20a1.7d9eb"
+            ]
+        ]
+    },
+    {
+        "id": "7d0ae80a.91af08",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "found_user",
+        "func": "let num_user = msg.payload.length;\nmsg.payload = num_user;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 450,
+        "y": 660,
+        "wires": [
+            [
+                "6f15cf56.365c3"
+            ]
+        ]
+    },
+    {
+        "id": "6f15cf56.365c3",
+        "type": "switch",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 550,
+        "y": 700,
+        "wires": [
+            [
+                "b8cdfca1.2c0cf"
+            ],
+            [
+                "90e8242.9b02ad8"
+            ]
+        ]
+    },
+    {
+        "id": "427f20a1.7d9eb",
+        "type": "mysql",
+        "z": "6edcc1be.603c4",
+        "mydb": "97e0808.147cb8",
+        "name": "insertData",
+        "x": 750,
+        "y": 700,
+        "wires": [
+            [
+                "6ba3be8e.26ebf"
+            ]
+        ]
+    },
+    {
+        "id": "6ba3be8e.26ebf",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 850,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "90e8242.9b02ad8",
+        "type": "function",
+        "z": "6edcc1be.603c4",
+        "name": "hello",
+        "func": "let device_list = msg.payload;\nlet oneid = msg['onechat']['source']['one_id'];\nlet bot_id = msg['onechat']['bot_id'];\nlet list_msg = \"hello\";\nlet req_body = {\n\t\"to\": oneid,\n\t\"bot_id\": \"Bae6208e0e88a54899030be3b4a903eea\",\n\t\"type\": \"text\",\n\t\"message\": list_msg,\n\t\"custom_notification\": \"เปิดอ่านข้อความใหม่จากทางเรา\"\n}\n\nmsg.payload = req_body;\nmsg.topic = \"covid_status\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 610,
+        "y": 740,
+        "wires": [
+            [
+                "361734aa.3e5b2c"
+            ]
+        ]
+    },
+    {
+        "id": "361734aa.3e5b2c",
+        "type": "http request",
+        "z": "6edcc1be.603c4",
+        "name": "smsg",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://chat-api.one.th/message/api/v1/push_message",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "authType": "bearer",
+        "x": 770,
+        "y": 760,
+        "wires": [
+            [
+                "25836436.10174c"
+            ]
+        ]
+    },
+    {
+        "id": "25836436.10174c",
+        "type": "debug",
+        "z": "6edcc1be.603c4",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 910,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "466c50dc.4f436",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "entered",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 580,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "ff1ce4f7.947508",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "keepAlive",
+        "func": "let one_id = msg['ibcon']['oneid'];\nlet minor = msg['ibcon']['minor'];\nlet major = msg['ibcon']['major'];\n\nlet q_cmd = `UPDATE access_logs\nSET access_logs.updated_at=CURRENT_TIMESTAMP\nWHERE access_logs.one_id='${one_id}' AND access_logs.minor=${minor} AND \naccess_logs.major=${major} AND DATE(access_logs.created_at)=CURRENT_DATE AND\naccess_logs.leave_at IS NULL`;\n\nmsg.payload = \"keepAlive\"\nmsg.topic = q_cmd;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 520,
+        "y": 100,
+        "wires": [
+            [
+                "47a48d0.b89a474"
+            ]
+        ]
+    },
+    {
+        "id": "772f0df2.081e14",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "isNotExist",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 420,
+        "y": 40,
+        "wires": [
+            [
+                "3bc0457.051473a"
+            ],
+            [
+                "594bda17.c020f4"
+            ]
+        ]
+    },
+    {
+        "id": "47a48d0.b89a474",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "updateLog",
+        "x": 550,
+        "y": 140,
+        "wires": [
+            [
+                "9d9a4daa.731a8",
+                "1a9a095e.acb137"
+            ]
+        ]
+    },
+    {
+        "id": "7a1abbe1.3a2544",
+        "type": "inject",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 520,
+        "wires": [
+            [
+                "d90cc627.30a5e8"
+            ]
+        ]
+    },
+    {
+        "id": "d90cc627.30a5e8",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "none_leave_debug",
+        "func": "let q_cmd = `SELECT access_logs.access_id, access_logs.one_id, access_logs.minor, access_logs.major,\naccess_logs.created_at, access_logs.updated_at, access_logs.leave_at, TIME_TO_SEC(TIMEDIFF(CURRENT_TIMESTAMP, access_logs.updated_at)) AS last_active\nFROM access_logs\nWHERE access_logs.leave_at IS NULL AND DATE(access_logs.updated_at)=CURRENT_DATE`;\n\nmsg.topic = q_cmd;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 230,
+        "y": 560,
+        "wires": [
+            [
+                "a10cccb0.dca3b"
+            ]
+        ]
+    },
+    {
+        "id": "a10cccb0.dca3b",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 360,
+        "y": 520,
+        "wires": [
+            [
+                "9a9515ba.49b3c8"
+            ]
+        ]
+    },
+    {
+        "id": "9a9515ba.49b3c8",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 450,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "a1f0cd89.ff825",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "atk_keep_alive",
+        "func": "let merchant_id = msg.payload[0]['shop_id'];\nlet customer_id = msg['ibcon']['oneid'];\nlet date_str = msg['ibcon']['date_str'];\nlet time_str = msg['ibcon']['time_str'];\nlet event_stage = msg['ibcon']['event_stage'];\nlet proximity = msg['ibcon']['proximity'];\n\nevent_stage=\"update\";\n\nlet req_body = {\n    \"customer_id\":customer_id,\n    \"merchant_id\":merchant_id,\n    \"date\":date_str,\n    \"time\":time_str,\n    \"event_stage\":event_stage,\n    \"proximity\":proximity\n}\n\nmsg.headers = {};\nmsg.headers[\"content-type\"] ='application/json';\nmsg.payload = req_body;\nmsg.topic = \"atk_keep_alive\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 820,
+        "y": 440,
+        "wires": [
+            [
+                "f49e34ab.cf7878",
+                "a7824509.4c3458"
+            ]
+        ]
+    },
+    {
+        "id": "9ba842b1.b0039",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "shop_info",
+        "func": "let major = msg['ibcon']['major'];\nlet minor = msg['ibcon']['minor'];\n\nlet q_cmd =`SELECT shops.minor, shops.major, shops.shop_id\nFROM shops\nWHERE shops.major=${major} AND shops.minor=${minor}`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 800,
+        "y": 320,
+        "wires": [
+            [
+                "62f1b52e.bcf55c"
+            ]
+        ]
+    },
+    {
+        "id": "62f1b52e.bcf55c",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 940,
+        "y": 320,
+        "wires": [
+            [
+                "680bd123.3ca84"
+            ]
+        ]
+    },
+    {
+        "id": "680bd123.3ca84",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "num_shop",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "num"
+            },
+            {
+                "t": "eq",
+                "v": "1",
+                "vt": "num"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 3,
+        "x": 810,
+        "y": 380,
+        "wires": [
+            [],
+            [
+                "a1f0cd89.ff825"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "f49e34ab.cf7878",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "keep_alive",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1010,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "9d9a4daa.731a8",
+        "type": "switch",
+        "z": "bd29eaa8.240968",
+        "name": "nearSensor",
+        "property": "ibcon.proximity",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "near",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 810,
+        "y": 280,
+        "wires": [
+            [
+                "9ba842b1.b0039"
+            ]
+        ]
+    },
+    {
+        "id": "1a9a095e.acb137",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "updateLog",
+        "func": "msg.topic = \"update_log\";\nmsg.payload = [];\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 570,
+        "y": 180,
+        "wires": [
+            [
+                "466c50dc.4f436"
+            ]
+        ]
+    },
+    {
+        "id": "a7824509.4c3458",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "atk_screening",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "https://atkscreening.one.th/management/api/v1/status/verify",
+        "tls": "dcfab808.896d58",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 960,
+        "y": 500,
+        "wires": [
+            [
+                "64485508.a24bbc"
+            ]
+        ]
+    },
+    {
+        "id": "64485508.a24bbc",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "jsonLoad",
+        "func": "let res = msg.payload;\nlet json_obj = JSON.parse(res);\nmsg.payload = json_obj;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1080,
+        "y": 440,
+        "wires": [
+            [
+                "8d412fcd.14bbd"
+            ]
+        ]
+    },
+    {
+        "id": "8d412fcd.14bbd",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "keep_alive",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1190,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "717f532e.5eea5c",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "leaveOther",
+        "func": "let minor = msg['ibcon']['minor'];\n\nlet q_cmd = `UPDATE access_logs\nSET access_logs.leave_at=CURRENT_TIMESTAMP\nWHERE DATE(access_logs.updated_at)=CURRENT_DATE AND access_logs.minor != ${minor}`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1550,
+        "y": 280,
+        "wires": [
+            [
+                "c680716.e12429"
+            ]
+        ]
+    },
+    {
+        "id": "c680716.e12429",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "leaveOther",
+        "x": 1410,
+        "y": 340,
+        "wires": [
+            [
+                "26dca5e3.38201a"
+            ]
+        ]
+    },
+    {
+        "id": "2722721a.f59016",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "ibcon",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1450,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "49fedf3.2426a2",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "401",
+        "headers": {},
+        "x": 280,
+        "y": 640,
+        "wires": []
+    },
+    {
+        "id": "48d54e99.81a75",
+        "type": "http in",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "addDevice",
+        "url": "/api/v1/atk/devices",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 100,
+        "y": 100,
+        "wires": [
+            [
+                "349026f2.80b72a",
+                "bc80b1c7.2c961"
+            ]
+        ]
+    },
+    {
+        "id": "349026f2.80b72a",
+        "type": "debug",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 290,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "118d1edc.7f0411",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "isDeviceExist",
+        "func": "msg['req_body'] = msg.payload;\n\nlet sn = msg['req_body']['sn'];\nlet major = msg['req_body']['major'];\nlet minor = msg['req_body']['minor'];\n\nlet q_cmd = `SELECT shops.minor, shops.major, shops.sn\nFROM shops\nWHERE shops.sn=\"${sn}\" OR shops.minor=${minor} AND shops.deleted_at IS NULL`;\n\nmsg.topic = q_cmd;\nmsg.payload = null;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 370,
+        "y": 160,
+        "wires": [
+            [
+                "d38e13b0.5977a"
+            ]
+        ]
+    },
+    {
+        "id": "d38e13b0.5977a",
+        "type": "mysql",
+        "z": "8c5ae4a5.2f7c48",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 460,
+        "y": 200,
+        "wires": [
+            [
+                "b4c6d27f.01cb7",
+                "a92f9d5c.ff674"
+            ]
+        ]
+    },
+    {
+        "id": "8df31089.43e86",
+        "type": "http in",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "getDevice",
+        "url": "/api/v1/atk/devices/:sn",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 140,
+        "y": 320,
+        "wires": [
+            [
+                "da61f024.f9f7a",
+                "9bb94d9.eba56b"
+            ]
+        ]
+    },
+    {
+        "id": "56f2e811.c89578",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 660,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "8ebd22ab.eab22",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "getDivice",
+        "func": "let sn = msg['req']['params']['sn'];\n\nlet q_cmd = `SELECT shops.minor, shops.major, shops.sn\nFROM shops\nWHERE shops.sn=\"${sn}\" AND shops.deleted_at IS NULL AND shops.product_state=0`;\n\nmsg.topic = q_cmd;\nmsg.payload = sn;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 320,
+        "y": 380,
+        "wires": [
+            [
+                "c0d3e5d2.82c6b8"
+            ]
+        ]
+    },
+    {
+        "id": "a74f1efe.5a216",
+        "type": "debug",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "c0d3e5d2.82c6b8",
+        "type": "mysql",
+        "z": "8c5ae4a5.2f7c48",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 400,
+        "y": 320,
+        "wires": [
+            [
+                "33a6adb1.9abad2"
+            ]
+        ]
+    },
+    {
+        "id": "b3bd07c3.006948",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "success",
+        "func": "let res = {\n    'type': true,\n    'message': \"success\",\n    'error_message': null,\n    'result': msg.payload\n}\n\nmsg.topic = \"success\";\nmsg.payload = res;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 500,
+        "y": 420,
+        "wires": [
+            [
+                "56f2e811.c89578",
+                "a74f1efe.5a216"
+            ]
+        ]
+    },
+    {
+        "id": "b4c6d27f.01cb7",
+        "type": "debug",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 570,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "a92f9d5c.ff674",
+        "type": "switch",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "isExist",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 600,
+        "y": 220,
+        "wires": [
+            [
+                "639c87ec.874ea8"
+            ],
+            [
+                "83070f3e.59967"
+            ]
+        ]
+    },
+    {
+        "id": "83070f3e.59967",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "deviceExist",
+        "func": "msg.payload = {\n    \"msg\":\"faild\",\n    \"result\":[],\n    \"help\":\"device is exist\"\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 770,
+        "y": 260,
+        "wires": [
+            [
+                "156eb67f.76f39a"
+            ]
+        ]
+    },
+    {
+        "id": "156eb67f.76f39a",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "400",
+        "headers": {},
+        "x": 780,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "639c87ec.874ea8",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "addDevice",
+        "func": "let sn = msg['req_body']['sn'];\nlet major = msg['req_body']['major'];\nlet minor = msg['req_body']['minor'];\n\nlet q_cmd = `INSERT INTO shops (minor, sn, major, shop_id, created_at, updated_at, deleted_at)\nVALUES (${minor}, '${sn}', ${major}, '', CURRENT_TIMESTAMP, NULL, NULL)`\n\nmsg.topic = q_cmd;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 770,
+        "y": 200,
+        "wires": [
+            [
+                "3cc521f.8becede"
+            ]
+        ]
+    },
+    {
+        "id": "bba5e39a.f42cf",
+        "type": "http in",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "allDevices",
+        "url": "/api/v1/atk/devices",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 120,
+        "y": 520,
+        "wires": [
+            [
+                "6e40f0c1.d8aa4"
+            ]
+        ]
+    },
+    {
+        "id": "de92380d.77ce58",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 700,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "9d28f9f0.a0f898",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "getDivice",
+        "func": "let sn = msg['req']['params']['sn'];\n\nlet q_cmd = `SELECT shops.minor, shops.major, shops.sn\nFROM shops\nWHERE shops.deleted_at IS NULL AND shops.product_state=0`;\n\nmsg.topic = q_cmd;\nmsg.payload = sn;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 280,
+        "y": 580,
+        "wires": [
+            [
+                "77ab5e68.abd17"
+            ]
+        ]
+    },
+    {
+        "id": "77ab5e68.abd17",
+        "type": "mysql",
+        "z": "8c5ae4a5.2f7c48",
+        "mydb": "97e0808.147cb8",
+        "name": "getData",
+        "x": 420,
+        "y": 540,
+        "wires": [
+            [
+                "1ebb18ad.8cc777"
+            ]
+        ]
+    },
+    {
+        "id": "bfa0e6aa.86c7e8",
+        "type": "debug",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 630,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "da61f024.f9f7a",
+        "type": "debug",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "req",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 160,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "9bb94d9.eba56b",
+        "type": "switch",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "property": "req.headers.authorization",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "$2a$12$PpO0HqBajBz9YSAiSG.eOutmsIPC45nEm4VsXGCnq4JmqZ4BNUZSy",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "8ebd22ab.eab22"
+            ],
+            [
+                "10589a83.9a2b15"
+            ]
+        ]
+    },
+    {
+        "id": "58b66717.801d98",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "401",
+        "headers": {},
+        "x": 300,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "10589a83.9a2b15",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "unAuth",
+        "func": "let res = {\n    'type': false,\n    'message': \"fail\",\n    'error_message': \"Unauthorized\",\n    'result': null\n}\n               \nmsg.payload = res;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 120,
+        "y": 400,
+        "wires": [
+            [
+                "58b66717.801d98"
+            ]
+        ]
+    },
+    {
+        "id": "1ebb18ad.8cc777",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "success",
+        "func": "let res = {\n    'type': true,\n    'message': \"success\",\n    'error_message': null,\n    'result': msg.payload\n}\n\nmsg.payload = res;\nmsg.topic = \"success\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 500,
+        "y": 600,
+        "wires": [
+            [
+                "de92380d.77ce58",
+                "bfa0e6aa.86c7e8"
+            ]
+        ]
+    },
+    {
+        "id": "6e40f0c1.d8aa4",
+        "type": "switch",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "property": "req.headers.authorization",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "$2a$12$PpO0HqBajBz9YSAiSG.eOutmsIPC45nEm4VsXGCnq4JmqZ4BNUZSy",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 110,
+        "y": 560,
+        "wires": [
+            [
+                "9d28f9f0.a0f898"
+            ],
+            [
+                "62cb7824.fe84d8"
+            ]
+        ]
+    },
+    {
+        "id": "62cb7824.fe84d8",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "unAuth",
+        "func": "let res = {\n    'type': false,\n    'message': \"fail\",\n    'error_message': \"Unauthorized\",\n    'result': null\n}\n               \nmsg.payload = res;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 120,
+        "y": 620,
+        "wires": [
+            [
+                "49fedf3.2426a2"
+            ]
+        ]
+    },
+    {
+        "id": "3cc521f.8becede",
+        "type": "mysql",
+        "z": "8c5ae4a5.2f7c48",
+        "mydb": "97e0808.147cb8",
+        "name": "addDevice",
+        "x": 890,
+        "y": 140,
+        "wires": [
+            [
+                "6aa74a17.d5fa04",
+                "662e989c.909fa8"
+            ]
+        ]
+    },
+    {
+        "id": "6aa74a17.d5fa04",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "res",
+        "func": "msg.topic = \"add_device\"\nmsg.payload = {\n    \"msg\":\"success\",\n    \"result\":msg.payload,\n    \"help\":\"device is exist\"\n};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 990,
+        "y": 180,
+        "wires": [
+            [
+                "4172a050.f1a74"
+            ]
+        ]
+    },
+    {
+        "id": "4172a050.f1a74",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 1040,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "662e989c.909fa8",
+        "type": "debug",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "res",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1060,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "d576e634.8aa6d8",
+        "type": "inject",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 720,
+        "wires": [
+            [
+                "370fcb54.edac44"
+            ]
+        ]
+    },
+    {
+        "id": "370fcb54.edac44",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "clearAccessLogs",
+        "func": "let q_cmd = `delete from access_logs`;\nmsg.topic = q_cmd;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 190,
+        "y": 760,
+        "wires": [
+            [
+                "1afc1eab.36c7a1"
+            ]
+        ]
+    },
+    {
+        "id": "c99f44b5.ba7628",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 410,
+        "y": 720,
+        "wires": []
+    },
+    {
+        "id": "1afc1eab.36c7a1",
+        "type": "mysql",
+        "z": "bd29eaa8.240968",
+        "mydb": "97e0808.147cb8",
+        "name": "deleteData",
+        "x": 390,
+        "y": 760,
+        "wires": [
+            [
+                "c99f44b5.ba7628"
+            ]
+        ]
+    },
+    {
+        "id": "e8b323aa.0c99e",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "401",
+        "headers": {},
+        "x": 320,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "b74736dc.d8ffe8",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "unAuth",
+        "func": "let res = {\n    'type': false,\n    'message': \"fail\",\n    'error_message': \"Unauthorized\",\n    'result': null\n}\n               \nmsg.payload = res;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 200,
+        "y": 200,
+        "wires": [
+            [
+                "e8b323aa.0c99e"
+            ]
+        ]
+    },
+    {
+        "id": "bc80b1c7.2c961",
+        "type": "switch",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "property": "req.headers.authorization",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "$2a$12$PpO0HqBajBz9YSAiSG.eOutmsIPC45nEm4VsXGCnq4JmqZ4BNUZSy",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "118d1edc.7f0411"
+            ],
+            [
+                "b74736dc.d8ffe8"
+            ]
+        ]
+    },
+    {
+        "id": "31993c08.cb7ea4",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1270,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "e54ec244.376e1",
+        "type": "http request",
+        "z": "bd29eaa8.240968",
+        "name": "uat",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "https://uat-atkscreening.one.th/management/api/v2/status/verify",
+        "tls": "dcfab808.896d58",
+        "persist": false,
+        "proxy": "",
+        "authType": "",
+        "x": 1250,
+        "y": 80,
+        "wires": [
+            [
+                "ccd8bfd9.1ad9b"
+            ]
+        ]
+    },
+    {
+        "id": "ccd8bfd9.1ad9b",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1280,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "1869d80c.d01e18",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "clrMerID",
+        "func": "msg.payload['merchant_id'] = \"\";\n// if(msg.payload['customer_id'] == \"6271993808\")\n// {\n//     msg.payload[\"mode\"] = \"dev\";\n// }\nmsg.payload[\"mode\"] = \"dev\";\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 1260,
+        "y": 140,
+        "wires": [
+            [
+                "fdfb6987.8fdc28",
+                "a938b68c.bf5aa8"
+            ]
+        ]
+    },
+    {
+        "id": "fdfb6987.8fdc28",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1450,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "33a6adb1.9abad2",
+        "type": "switch",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "property": "payload.length",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "0",
+                "vt": "str"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 490,
+        "y": 360,
+        "wires": [
+            [
+                "1fced880.95fe58"
+            ],
+            [
+                "b3bd07c3.006948"
+            ]
+        ]
+    },
+    {
+        "id": "68a6a6cf.476448",
+        "type": "http response",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "",
+        "statusCode": "404",
+        "headers": {},
+        "x": 600,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "1fced880.95fe58",
+        "type": "function",
+        "z": "8c5ae4a5.2f7c48",
+        "name": "not_found",
+        "func": "let res = {\n    'type': false,\n    'message': \"fail\",\n    'error_message': \"Not Found\",\n    'result': null\n}\n\nmsg.topic = \"not_found\";\nmsg.payload = res;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 580,
+        "y": 320,
+        "wires": [
+            [
+                "68a6a6cf.476448"
+            ]
+        ]
+    },
+    {
+        "id": "594bda17.c020f4",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "fdb0dd2d.0dd",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1070,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "1d19277b.a45439",
+        "type": "debug",
+        "z": "bd29eaa8.240968",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "47133d19.7f5204",
+        "type": "function",
+        "z": "bd29eaa8.240968",
+        "name": "isExist",
+        "func": "msg.topic = \"isExist\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "x": 350,
+        "y": 100,
+        "wires": [
+            [
+                "1d19277b.a45439"
+            ]
+        ]
+    }
+]
